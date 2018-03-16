@@ -14,7 +14,7 @@ import (
 
 const (
 	appName = "ubisoft-backend-interview"
-	appKey = "ubisoft-backend-interview"
+	appKey  = "ubisoft-backend-interview"
 )
 
 var (
@@ -28,7 +28,7 @@ func main() {
 	flag.Parse()
 
 	if *versionInfo {
-		fmt.Printf("-- kwiesmueller %s --\n", appName)
+		fmt.Printf("-- %s --\n", appName)
 		version.PrintFull()
 	}
 	runtime.GOMAXPROCS(*maxprocs)
