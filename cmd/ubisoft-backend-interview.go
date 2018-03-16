@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"runtime"
 
+	"github.com/kwiesmueller/ubisoft-backend-interview/pkg/feedback"
+
+	"github.com/kwiesmueller/ubisoft-backend-interview/pkg/database"
+
 	"github.com/golang/glog"
 	"github.com/kolide/kit/version"
 	"github.com/playnet-public/libs/log"
@@ -46,7 +50,40 @@ func main() {
 
 	log := log.New(appKey, *sentryDsn, *dbg).WithFields(zapFields...)
 	defer log.Sync()
-	log.Info("preparing")
+	log.Info("starting")
 
-	fmt.Println("main.go")
+	if err := do(log); err != nil {
+		log.Fatal("terminating", zap.Error(err))
+	}
+}
+
+func do(log *log.Logger) error {
+	db := database.New(log)
+	err := db.Open(`host=localhost port=5432 user=db password=db dbname=db sslmode=disable`)
+	if err != nil {
+		return err
+	}
+
+	svc := feedback.New(log, db)
+
+	err = svc.Add(feedback.Entry{SessionID: "1", UserID: "a", Rating: 1, Comment: ""})
+	if err != nil {
+		log.Error("add error", zap.Error(err))
+	}
+	err = svc.Add(feedback.Entry{SessionID: "1", UserID: "b", Rating: 2, Comment: "abc"})
+	if err != nil {
+		log.Error("add error", zap.Error(err))
+	}
+	err = svc.Add(feedback.Entry{SessionID: "2", UserID: "a", Rating: 2, Comment: "abc"})
+	if err != nil {
+		log.Error("add error", zap.Error(err))
+	}
+	err = svc.Add(feedback.Entry{SessionID: "2", UserID: "b", Rating: 2, Comment: "abc"})
+	if err != nil {
+		log.Error("add error", zap.Error(err))
+	}
+
+	fmt.Println(svc.GetLatest(1))
+
+	return nil
 }

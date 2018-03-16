@@ -68,9 +68,9 @@ func (c *Connection) Add(entry feedback.Entry) error {
 }
 
 // GetLatest n entries from the database
-func (c *Connection) GetLatest(n int) ([]feedback.Entry, error) {
+func (c *Connection) GetLatest(n uint) ([]feedback.Entry, error) {
 	c.Debug("reading entries",
-		zap.Int("count", n),
+		zap.Uint("count", n),
 	)
 
 	query := `SELECT id, session_id, user_id, rating, comment FROM entries
@@ -78,7 +78,7 @@ func (c *Connection) GetLatest(n int) ([]feedback.Entry, error) {
 	statement, err := c.Prepare(query)
 	if err != nil {
 		c.Error("statement error",
-			zap.Int("count", n),
+			zap.Uint("count", n),
 			zap.Error(err),
 		)
 		return nil, err
@@ -87,7 +87,7 @@ func (c *Connection) GetLatest(n int) ([]feedback.Entry, error) {
 	rows, err := statement.Query(n)
 	if err != nil {
 		c.Error("query error",
-			zap.Int("count", n),
+			zap.Uint("count", n),
 			zap.Error(err),
 		)
 		return nil, err
@@ -108,7 +108,7 @@ func (c *Connection) GetLatest(n int) ([]feedback.Entry, error) {
 		)
 		if err != nil {
 			c.Error("row scan error",
-				zap.Int("count", n),
+				zap.Uint("count", n),
 				zap.Error(err),
 			)
 			return nil, err
@@ -117,7 +117,7 @@ func (c *Connection) GetLatest(n int) ([]feedback.Entry, error) {
 		count++
 	}
 	c.Debug("finished reading entries",
-		zap.Int("count", n),
+		zap.Uint("count", n),
 		zap.Int8("entries", count),
 	)
 
