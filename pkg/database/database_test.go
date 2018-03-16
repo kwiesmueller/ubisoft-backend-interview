@@ -89,7 +89,7 @@ func TestConnection_Add(t *testing.T) {
 func TestConnection_GetLatest(t *testing.T) {
 	tests := []struct {
 		name            string
-		input           int
+		input           uint
 		result          []feedback.Entry
 		expectedPrepare bool
 		expectedQuery   bool
@@ -172,7 +172,7 @@ func TestConnection_GetLatest(t *testing.T) {
 			if (err == nil) == tt.err {
 				t.Fatalf("Add() == %v want %v", err, tt.err)
 			}
-			if count := len(entries); count > tt.input {
+			if count := len(entries); count > int(tt.input) {
 				t.Fatal("too many entries returned", count)
 			}
 
