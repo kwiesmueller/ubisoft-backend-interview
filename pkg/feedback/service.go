@@ -23,7 +23,7 @@ func New(log *log.Logger, repo Repository) *Service {
 // Add entry to Repository
 func (s *Service) Add(entry Entry) error {
 	if entry.Rating > 5 || entry.Rating < 1 {
-		return errInvalidRating
+		return ErrInvalidRating
 	}
 	return s.repo.Add(entry)
 }

@@ -22,12 +22,12 @@ func TestAdd(t *testing.T) {
 
 	e := Entry{Rating: 0}
 	err := svc.Add(e)
-	if err != errInvalidRating {
+	if err != ErrInvalidRating {
 		t.Fatal("Add() should return error")
 	}
 	e = Entry{Rating: 6}
 	err = svc.Add(e)
-	if err != errInvalidRating {
+	if err != ErrInvalidRating {
 		t.Fatal("Add() should return error")
 	}
 	e = Entry{Rating: 5}
