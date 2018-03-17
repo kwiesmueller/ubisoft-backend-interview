@@ -61,7 +61,7 @@ run: build
 
 # run specified tool from code
 dev:
-	@go run -ldflags ${KIT_VERSION} $(TOOLS_DIR)/*.go
+	@go run -ldflags ${KIT_VERSION} $(TOOLS_DIR)/*.go -debug -version=false
 # build the docker image
 docker: build-in-docker build-image
 
