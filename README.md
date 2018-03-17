@@ -1,6 +1,5 @@
 # Ubisoft backend developer role test.
 [![Go Report Card](https://goreportcard.com/badge/github.com/kwiesmueller/ubisoft-backend-interview)](https://goreportcard.com/report/github.com/kwiesmueller/ubisoft-backend-interview)
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Build Status](https://travis-ci.org/kwiesmueller/ubisoft-backend-interview.svg?branch=master)](https://travis-ci.org/kwiesmueller/ubisoft-backend-interview)
 [![Docker Repository on Quay](https://quay.io/repository/finch/ubisoft-backend-interview/status "Docker Repository on Quay")](https://quay.io/repository/finch/ubisoft-backend-interview)
 
