@@ -3,10 +3,20 @@ package database
 import (
 	"testing"
 
+	"github.com/lib/pq"
+
 	"github.com/kwiesmueller/ubisoft-backend-interview/pkg/feedback"
 	"github.com/playnet-public/libs/log"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
+
+func TestConnection_Open(t *testing.T) {
+	con := New(log.New("test", "", true))
+	err := con.Open("")
+	if err == nil {
+		t.Fatal("connection error mishandled")
+	}
+}
 
 func TestConnection_Add(t *testing.T) {
 	db, mock, err := sqlmock.New()
@@ -181,4 +191,26 @@ func TestConnection_GetLatest(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestHandleError(t *testing.T) {
+	errs := []struct {
+		in  error
+		out error
+	}{
+		{
+			&pq.Error{
+				Code: "23505",
+			},
+			feedback.ErrDuplicateEntry,
+		},
+	}
+	for _, err := range errs {
+		t.Run(err.in.Error(), func(t *testing.T) {
+			if got := handleError(err.in); got != err.out {
+				t.Fatalf("handleError() = %v want %v", got, err.out)
+			}
+		})
+	}
+
 }
