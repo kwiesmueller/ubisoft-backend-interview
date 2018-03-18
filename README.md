@@ -15,6 +15,12 @@ Would be happy to know if this appears in any games I play, though.
 
 ## Description
 
+### Intro
+
+If you wonder, why that much text for a test I wasn't even asked for? Let's call out loud thinking and self reminding. While this text might explain my thoughts and decisions to somebody at Ubi stumbling over my PR, it is mainly thought as self-improvement. I took the chance to build something easy aside from my other projects to go over my own decisions, patterns and best/worst practices. I guess when I am done I might convert this into some kind of endless refactoring experiment of sorts. Who knows.
+
+### Facts
+
 My implementation of this test is written in Golang. This choice was somehow obvious to me, as I 
 on one hand really like to work with go, and on the other hand think it is a perfect match on this.
 The implementation might be slightly longer than using NodeJS, Python or others but for that, one gets a solid, well tested and naturally multi-threading service with a very small footprint.
@@ -68,6 +74,12 @@ For monitoring my choice is prometheus, for which a simple middleware is being u
 
 Some benefits of the chosen logging library are type-safe structured logging, good performance even on high throughput and the added [Sentry](https://sentry.io) integration which will forward all errors logged to the supplied Sentry instance (see the `-sentryDsn` parameter).
 Additionally it would be no effort to use the built-in tracing library [Jaeger](github.com/uber/jaeger-lib), which has been spared for now, as it might have been out of scope.
+
+Error handling is a question I thought for some time as well. As you might see on my code, I tend to pass on errors until the end. Database grade errors get caught and overwritten with more user-friendly ones as I did not want to disclose database insight to the user, but cases like the query param verification are still something i have to decide on.
+At the moment errors from strconv get (while wrapped) returned to the user (see [API Docs](https://ubisoftbackendinterview.docs.apiary.io/#)). As I am not entirely sure about the kind of deployment or what access the user will have to those error messages, this might be not most beautiful decision.
+
+It would be possible (and pretty easy) to 
+
 
 ## Test
 
