@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/http"
 	"runtime"
 
 	"github.com/kwiesmueller/ubisoft-backend-interview/pkg/feedback"
@@ -72,24 +73,14 @@ func do(log *log.Logger) error {
 
 	svc := feedback.New(log, db)
 
-	err = svc.Add(feedback.Entry{SessionID: "1", UserID: "a", Rating: 1, Comment: ""})
-	if err != nil {
-		log.Error("add error", zap.Error(err))
-	}
-	err = svc.Add(feedback.Entry{SessionID: "1", UserID: "b", Rating: 2, Comment: "abc"})
-	if err != nil {
-		log.Error("add error", zap.Error(err))
-	}
-	err = svc.Add(feedback.Entry{SessionID: "2", UserID: "a", Rating: 2, Comment: "abc"})
-	if err != nil {
-		log.Error("add error", zap.Error(err))
-	}
-	err = svc.Add(feedback.Entry{SessionID: "2", UserID: "b", Rating: 2, Comment: "abc"})
-	if err != nil {
-		log.Error("add error", zap.Error(err))
-	}
+	m := http.NewServeMux()
+	m.Handle("/", svc.Handler())
 
-	fmt.Println(svc.GetLatest(1))
-
+	log.Info("listening", zap.String("addr", ":8080"))
+	err = http.ListenAndServe(":8080", m)
+	if err != nil {
+		log.Error("server error", zap.Error(err))
+		return err
+	}
 	return nil
 }
