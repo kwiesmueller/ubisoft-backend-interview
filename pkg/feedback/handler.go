@@ -53,6 +53,9 @@ func (s *Service) getEntries(w http.ResponseWriter, r *http.Request) (err error)
 	if err != nil {
 		return err
 	}
+	if entries == nil {
+		entries = []Entry{}
+	}
 	return writeJSON(w, entries)
 }
 
