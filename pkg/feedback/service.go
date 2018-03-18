@@ -32,3 +32,8 @@ func (s *Service) Add(entry Entry) error {
 func (s *Service) GetLatest(n uint) ([]Entry, error) {
 	return s.repo.GetLatest(n)
 }
+
+// GetLatestFiltered n entries by rating from Repository
+func (s *Service) GetLatestFiltered(n uint, filter int) ([]Entry, error) {
+	return s.repo.GetLatestFiltered(n, filter)
+}

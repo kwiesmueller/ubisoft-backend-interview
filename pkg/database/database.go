@@ -2,8 +2,10 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/lib/pq"
+	"github.com/pkg/errors"
 
 	"github.com/kwiesmueller/ubisoft-backend-interview/pkg/feedback"
 
@@ -77,28 +79,61 @@ func (c *Connection) Add(entry feedback.Entry) (err error) {
 }
 
 // GetLatest n entries from the database
-func (c *Connection) GetLatest(n uint) ([]feedback.Entry, error) {
+func (c *Connection) GetLatest(n uint) (entries []feedback.Entry, err error) {
 	c.Debug("reading entries",
-		zap.Uint("count", n),
+		zap.Uint("limit", n),
+	)
+	defer c.Debug("finished reading entries",
+		zap.Uint("limit", n),
+		zap.Int("entries", len(entries)),
 	)
 
 	query := `SELECT id, session_id, user_id, rating, comment FROM entries
 	ORDER BY id DESC LIMIT $1`
-	statement, err := c.Prepare(query)
+	entries, err = c.getEntries(query, n)
 	if err != nil {
-		c.Error("statement error",
-			zap.Uint("count", n),
+		c.Error("get entries failed",
+			zap.Uint("limit", n),
 			zap.Error(err),
 		)
-		return nil, err
 	}
 
-	rows, err := statement.Query(n)
+	return entries, err
+}
+
+// GetLatestFiltered n entries by rating from the database
+func (c *Connection) GetLatestFiltered(n uint, filter int) (entries []feedback.Entry, err error) {
+	c.Debug("reading entries",
+		zap.Uint("limit", n),
+		zap.Int("filter", filter),
+	)
+	defer c.Debug("finished reading entries",
+		zap.Uint("limit", n),
+		zap.Int("filter", filter),
+		zap.Int("entries", len(entries)),
+	)
+
+	query := `SELECT id, session_id, user_id, rating, comment FROM entries WHERE rating = $2
+	ORDER BY id DESC LIMIT $1`
+	entries, err = c.getEntries(query, n, filter)
 	if err != nil {
-		c.Error("query error",
-			zap.Uint("count", n),
+		c.Error("get entries failed",
+			zap.Uint("limit", n),
+			zap.Int("filter", filter),
 			zap.Error(err),
 		)
+	}
+
+	return entries, err
+}
+
+func (c *Connection) getEntries(query string, args ...interface{}) ([]feedback.Entry, error) {
+	statement, err := c.Prepare(query)
+	if err != nil {
+		return nil, errors.Wrap(err, "statement error")
+	}
+	rows, err := statement.Query(args...)
+	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
@@ -116,20 +151,12 @@ func (c *Connection) GetLatest(n uint) ([]feedback.Entry, error) {
 			&entry.Comment,
 		)
 		if err != nil {
-			c.Error("row scan error",
-				zap.Uint("count", n),
-				zap.Error(err),
-			)
-			return nil, err
+			return nil, errors.Wrap(err, "row scan error")
 		}
 		entries = append(entries, entry)
 		count++
 	}
-	c.Debug("finished reading entries",
-		zap.Uint("count", n),
-		zap.Int8("entries", count),
-	)
-
+	fmt.Println(entries)
 	return entries, nil
 }
 

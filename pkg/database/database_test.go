@@ -193,6 +193,107 @@ func TestConnection_GetLatest(t *testing.T) {
 	}
 }
 
+func TestConnection_GetLatestFiltered(t *testing.T) {
+	tests := []struct {
+		name            string
+		limit           uint
+		filter          int
+		result          []feedback.Entry
+		expectedPrepare bool
+		expectedQuery   bool
+		err             bool
+	}{
+		{
+			"basicEntry",
+			1,
+			1,
+			[]feedback.Entry{
+				{
+					SessionID: "abc123",
+					UserID:    "123abc",
+					Rating:    1,
+					Comment:   "test",
+				},
+			},
+			true,
+			true,
+			false,
+		},
+		{
+			"errorPrepareEntry",
+			1,
+			1,
+			[]feedback.Entry{
+				{
+					SessionID: "abc123",
+					UserID:    "123abc",
+					Rating:    1,
+					Comment:   "test",
+				},
+			},
+			false,
+			false,
+			true,
+		},
+		{
+			"errorQueryEntry",
+			1,
+			1,
+			[]feedback.Entry{
+				{
+					SessionID: "abc123",
+					UserID:    "123abc",
+					Rating:    1,
+					Comment:   "test",
+				},
+			},
+			true,
+			false,
+			true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			if err != nil {
+				t.Error(err)
+			}
+			defer db.Close()
+
+			con := New(log.NewNop())
+			con.DB = db
+
+			mock.MatchExpectationsInOrder(false)
+
+			query := `SELECT id, session_id, user_id, rating, comment FROM entries WHERE rating = (.+)
+			ORDER BY id DESC LIMIT (.+)`
+			rows := sqlmock.NewRows([]string{"id", "session_id", "user_id", "rating", "comment"})
+			for i, e := range tt.result {
+				rows = rows.AddRow(i+1, e.SessionID, e.UserID, e.Rating, e.Comment)
+			}
+			if tt.expectedPrepare {
+				mock.ExpectPrepare(query)
+			}
+			if tt.expectedQuery {
+				mock.ExpectQuery(query).WithArgs(1, 2).WillReturnRows(rows)
+			}
+
+			entries, err := con.GetLatestFiltered(tt.limit, tt.filter)
+			if (err == nil) == tt.err {
+				t.Fatalf("Add() == %v want %v", err, tt.err)
+			}
+			if count := len(entries); count > int(tt.limit) {
+				t.Fatal("too many entries returned", count)
+			}
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatal("expectations not met for insert", err)
+			}
+		})
+	}
+}
+
 func TestHandleError(t *testing.T) {
 	errs := []struct {
 		in  error

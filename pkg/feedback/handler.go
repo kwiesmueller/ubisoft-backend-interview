@@ -2,17 +2,18 @@ package feedback
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
 // Handler for the service endpoints
 func (s *Service) Handler() *mux.Router {
 	m := mux.NewRouter()
-	m.Path("/").Methods("GET").HandlerFunc(s.MakeHandler(s.getEntries))
+	m.Path("/list").Methods("GET").HandlerFunc(s.MakeHandler(s.getEntries))
 	m.Path("/{sessionID}").Methods("POST").HandlerFunc(s.MakeHandler(s.addEntry))
 	return m
 }
@@ -29,26 +30,47 @@ func (s *Service) MakeHandler(h handler) http.HandlerFunc {
 	}
 }
 
-func (s *Service) getEntries(w http.ResponseWriter, r *http.Request) error {
-	entries, err := s.GetLatest(15)
-	if err != nil {
-		if err := writeError(w, err); err != nil {
-			s.Error("write error", zap.Error(err))
+func (s *Service) getEntries(w http.ResponseWriter, r *http.Request) (err error) {
+	defer func() { s.deferError(w, err) }()
+	var entries []Entry
+
+	limit := uint(15)
+	limitParam := r.URL.Query().Get("limit")
+	if len(limitParam) > 0 {
+		u64, err := strconv.ParseUint(limitParam, 10, 32)
+		if err != nil {
+			return errors.Wrap(err, "invalid limit value")
 		}
+		limit = uint(u64)
+	}
+
+	filter := r.URL.Query().Get("filter")
+	if len(filter) > 0 {
+		entries, err = s.getFiltered(limit, filter)
+	} else {
+		entries, err = s.GetLatest(limit)
+	}
+	if err != nil {
 		return err
 	}
 	return writeJSON(w, entries)
 }
 
+func (s *Service) getFiltered(limit uint, filter string) (entries []Entry, err error) {
+	f, err := strconv.Atoi(filter)
+	if err != nil {
+		return nil, errors.Wrap(err, "invalid filter value")
+	}
+	entries, err = s.GetLatestFiltered(limit, f)
+	if err != nil {
+		return nil, err
+	}
+	return entries, err
+}
+
 func (s *Service) addEntry(w http.ResponseWriter, r *http.Request) (err error) {
-	defer func() {
-		if err != nil {
-			s.Warn("failed adding entry", zap.Error(err))
-			if err := writeError(w, err); err != nil {
-				s.Error("write error", zap.Error(err))
-			}
-		}
-	}()
+	defer func() { s.deferError(w, err) }()
+
 	var entry Entry
 	if err := json.NewDecoder(r.Body).Decode(&entry); err != nil {
 		return err
@@ -61,7 +83,6 @@ func (s *Service) addEntry(w http.ResponseWriter, r *http.Request) (err error) {
 
 	entry.SessionID = vars["sessionID"]
 	entry.UserID = r.Header.Get("Ubi-UserId")
-	fmt.Println("userid", entry.UserID)
 
 	if len(entry.UserID) < 1 {
 		return ErrNoUserID
@@ -72,6 +93,15 @@ func (s *Service) addEntry(w http.ResponseWriter, r *http.Request) (err error) {
 	}
 
 	return writeJSON(w, struct{}{})
+}
+
+func (s *Service) deferError(w http.ResponseWriter, err error) {
+	if err != nil {
+		s.Warn("failed adding entry", zap.Error(err))
+		if err := writeError(w, err); err != nil {
+			s.Error("write error", zap.Error(err))
+		}
+	}
 }
 
 func writeJSON(w http.ResponseWriter, v interface{}) error {

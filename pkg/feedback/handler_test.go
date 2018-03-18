@@ -3,7 +3,6 @@ package feedback
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http/httptest"
 	"reflect"
 	"strings"
@@ -29,15 +28,20 @@ func TestService_getEntries(t *testing.T) {
 	tests := []struct {
 		name        string
 		wantEntries []Entry
+		request     requestbuilder.HttpRequestBuilder
 
-		getLatestFunc func(uint) ([]Entry, error)
+		getLatestFunc         func(uint) ([]Entry, error)
+		getLatestFilteredFunc func(uint, int) ([]Entry, error)
 
 		wantErr bool
 	}{
 		{
 			"emptyList",
 			[]Entry{},
-			func(n uint) ([]Entry, error) {
+			requestbuilder.NewHTTPRequestBuilder("http://127.0.0.1:8080/list").
+				SetMethod("GET"),
+			nil,
+			func(n uint, f int) ([]Entry, error) {
 				return []Entry{}, nil
 			},
 			false,
@@ -45,20 +49,95 @@ func TestService_getEntries(t *testing.T) {
 		{
 			"error",
 			nil,
+			requestbuilder.NewHTTPRequestBuilder("http://127.0.0.1:8080/list").
+				SetMethod("GET"),
 			func(n uint) ([]Entry, error) {
 				return []Entry{}, errors.New("test error")
+			},
+			func(n uint, f int) ([]Entry, error) {
+				return []Entry{}, errors.New("test error")
+			},
+			true,
+		},
+		{
+			"filteredList",
+			[]Entry{
+				{"1", "1", "1", 1, ""},
+				{"3", "3", "1", 1, ""},
+				{"5", "5", "1", 1, ""},
+			},
+			requestbuilder.NewHTTPRequestBuilder("http://127.0.0.1:8080/list").
+				SetMethod("GET").AddParameter("filter", "1"),
+			nil,
+			func(n uint, f int) ([]Entry, error) {
+				return []Entry{
+					{"1", "1", "1", 1, ""},
+					{"3", "3", "1", 1, ""},
+					{"5", "5", "1", 1, ""},
+				}, nil
+			},
+			false,
+		},
+		{
+			"customLimitList",
+			[]Entry{
+				{"1", "1", "1", 1, ""},
+			},
+			requestbuilder.NewHTTPRequestBuilder("http://127.0.0.1:8080/list").
+				SetMethod("GET").AddParameter("filter", "1").AddParameter("limit", "1"),
+			nil,
+			func(n uint, f int) ([]Entry, error) {
+				return []Entry{
+					{"1", "1", "1", 1, ""},
+				}, nil
+			},
+			false,
+		},
+		{
+			"invalidFilter",
+			nil,
+			requestbuilder.NewHTTPRequestBuilder("http://127.0.0.1:8080/list").
+				SetMethod("GET").AddParameter("filter", "abc"),
+			nil,
+			func(n uint, f int) ([]Entry, error) {
+				return []Entry{
+					{"1", "1", "1", 1, ""},
+					{"3", "3", "1", 1, ""},
+					{"5", "5", "1", 1, ""},
+				}, nil
+			},
+			true,
+		},
+		{
+			"filterError",
+			nil,
+			requestbuilder.NewHTTPRequestBuilder("http://127.0.0.1:8080/list").
+				SetMethod("GET").AddParameter("filter", "1"),
+			nil,
+			func(n uint, f int) ([]Entry, error) {
+				return []Entry{}, errors.New("test error")
+			},
+			true,
+		},
+		{
+			"invalidLimit",
+			nil,
+			requestbuilder.NewHTTPRequestBuilder("http://127.0.0.1:8080/list").
+				SetMethod("GET").AddParameter("filter", "1").AddParameter("limit", "x"),
+			nil,
+			func(n uint, f int) ([]Entry, error) {
+				return []Entry{
+					{"1", "1", "1", 1, ""},
+				}, nil
 			},
 			true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			svc.repo = newMockRepository(func(e Entry) error {
-				return nil
-			}, tt.getLatestFunc)
+			svc.repo = newMockRepository(nil, tt.getLatestFunc, tt.getLatestFilteredFunc)
 
-			req, err := requestbuilder.NewHTTPRequestBuilder("http://127.0.0.1:8080/").
-				SetMethod("GET").Build()
+			req, err := tt.request.Build()
 			if err != nil {
 				t.Error(err)
 			}
@@ -168,7 +247,7 @@ func TestService_addEntry(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			svc.repo = newMockRepository(tt.addFunc, func(n uint) ([]Entry, error) {
 				return []Entry{}, nil
-			})
+			}, nil)
 			m := mux.NewRouter()
 			m.Path("/{sessionID}").Methods("POST").HandlerFunc(svc.MakeHandler(svc.addEntry))
 
