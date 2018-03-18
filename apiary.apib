@@ -7,7 +7,12 @@ This is a simple feedback collection and retrival service built for the ubisoft-
 
 ## Feedback [/{sessionID}]
 
-### List the last 15 feedback entries [GET /]
+### List recent feedback entries [GET /list?filter={filter}&limit={limit}]
+
++ Parameters
+    + filter (int, optional) - Shows only ratings with this value
+    + limit  (int, optional) - Limits the returend values (default: 15)
+        + Default: 15
 
 + Response 200 (application/json)
 
@@ -20,6 +25,26 @@ This is a simple feedback collection and retrival service built for the ubisoft-
                 "comment": "text"
             }
         ]
+
++ Request with invalid limit value
+
+        {}
+       
++ Response 500 (application/json)
+
+        {
+            "error": "invalid limit value: strconv.ParseUint: parsing \"-1\": invalid syntax"
+        }
+
++ Request with invalid filter value
+
+        {}
+
++ Response 500 (application/json)
+
+        {
+            "error": "invalid filter value: strconv.Atoi: parsing \"a\": invalid syntax"
+        }
 
 ### Add new entry [POST /{sessionID}]
 
