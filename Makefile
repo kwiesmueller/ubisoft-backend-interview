@@ -41,11 +41,12 @@ deps:
 	go get -u golang.org/x/tools/cmd/goimports
 	go get -u github.com/golang/lint/golint
 	go get -u github.com/kisielk/errcheck
+	go get -u github.com/haya14busa/goverage
+	go get -u github.com/schrej/godacov
 	go get -u github.com/golang/dep/cmd/dep
 ifdef BUILD_DEB
 	go get -u github.com/bborbe/debian_utils/bin/create_debian_package
 endif
-	dep ensure
 
 # install passed in tool project
 install:

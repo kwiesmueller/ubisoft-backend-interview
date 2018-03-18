@@ -1,9 +1,11 @@
 # Ubisoft backend developer role test.
 [![Go Report Card](https://goreportcard.com/badge/github.com/kwiesmueller/ubisoft-backend-interview)](https://goreportcard.com/report/github.com/kwiesmueller/ubisoft-backend-interview)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/dd692d4293644b1ca429a1f69001c225)](https://www.codacy.com/app/kwiesmueller/ubisoft-backend-interview?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kwiesmueller/ubisoft-backend-interview&amp;utm_campaign=Badge_Grade)
 [![Build Status](https://travis-ci.org/kwiesmueller/ubisoft-backend-interview.svg?branch=master)](https://travis-ci.org/kwiesmueller/ubisoft-backend-interview)
 [![Docker Repository on Quay](https://quay.io/repository/finch/ubisoft-backend-interview/status "Docker Repository on Quay")](https://quay.io/repository/finch/ubisoft-backend-interview)
 
 ## About
+
 - **Author:** kwiesmueller
 - **Started:** March 17th, 2018 - 8pm GMT+1
 - **Purpose:** Just for fun... Get in touch if you like. 

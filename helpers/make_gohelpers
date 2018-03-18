@@ -21,3 +21,6 @@ format:
 # test entire repo
 test:
 	@go test -cover -race $(shell go list ./... | grep -v /vendor/)
+
+cover:
+	goverage -v -coverprofile=coverage.out $(shell go list ./... | grep -v /vendor/)
