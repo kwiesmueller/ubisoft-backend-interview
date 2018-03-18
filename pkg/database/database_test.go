@@ -206,7 +206,7 @@ func TestConnection_GetLatestFiltered(t *testing.T) {
 		{
 			"basicEntry",
 			1,
-			1,
+			2,
 			[]feedback.Entry{
 				{
 					SessionID: "abc123",
