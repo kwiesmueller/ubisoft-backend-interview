@@ -12,6 +12,59 @@
 - **License:** Do whatever you want with it...
 Would be happy to know if this appears in any games I play, though.
 
+## Description
+
+My implementation of this test is written in Golang. This choice was somehow obvious to me, as I 
+on one hand really like to work with go, and on the other hand think it is a perfect match on this.
+The implementation might be slightly longer than using NodeJS, Python or others but for that, one gets a solid, well tested and naturally multi-threading service with a very small footprint.
+
+Due to the motivation to ensure production grade quality and the testing added to all parts of the application, the entire development took longer than expected, which you might see based on my commits. Other languages, especially those allowing much easier mocking for tests might have been faster there, but I am still happy with the amount of time spent and the resulting quality.
+As one point in the original task was to only comment code if needed, only comments specifically required by Golang were added.
+
+While using a quite general persistence design internally, my implementation of it is using PostgreSQL.
+The choice for SQL is obvious I think, as the data is structured and it's design is known.
+PostgreSQL should be able to easily handle this service both in single or as replicated deployments (maybe using something like spilo for clustering PostgreSQL might be good in a production environment).
+
+I also thought about not doing any common database persistence as the required limit by 15 looked like feedback further in the past wouldn't ever be used, but (as you can see in my service implementation) I wanted to keep the option open for retrieving more data.
+
+Switching to a different persistence technology (like using batcher internally) or even existing NoSQL databases, is fairly easy. All that has to be done is implementing the [Repository Interface](pkg/feedback/repository.go). I might even supply another database option once I'm finished.
+
+The app itself is naturally packet into a docker image, but can also be built and deployed as single binary if necessary. Kubernetes manifests are supplied with the image as an example, too.
+
+## Dependencies
+
+- First of all [Golang](https://golang.org/dl/) 1.9 is required (older and newer might work, but is not tested by me for now)
+- For building the image and starting PostgreSQL, [Docker](https://www.docker.com/community-edition) is required
+
+All code dependencies and vendor libraries are checked in, so there should be no need to do anything else. If you want to test the code run `make deps` before to get the used Golang testing and coverage tools.
+
+Dependency management is done with [dep](https://github.com/golang/dep).
+
+## Usage
+
+To run the implementation the database server has to be up first. To do so, the [Makefile](Makefile) contains a little helper to start the [postgres container](helpers/make_db).
+To start it, execute the following:
+```bash
+DB_PASSWORD=db make start-db
+```
+Note that this starts the database attached to your tty, so best do this in a separate terminal.
+If you are starting the db for the first time, building the [database structure](db.sql) is required:
+```bash
+cat db.sql | docker exec -i ubisoft-backend-interview-db psql -U db -d db -
+```
+After that, the service should be able to reach your local instance of PostgreSQL and work.
+
+To start, either run `make dev` for debug output or `make run` to build and run the binary.
+
+## Logging and Monitoring
+
+Please note, that due to the used logging library configuration (down at the core [uber-go/zap](go.uber.org/zap)) running without debug won't print INFO either. This could be changed easily, but in my own deployments I saw this information is mostly not required and very verbose. If there is the need of debugging through info logs, I prefer real debugging (or cloud debugging using breakpoints etc.).
+
+For monitoring my choice is prometheus, for which a simple middleware is being used to collect usage metrics and statistics.
+
+Some benefits of the chosen logging library are type-safe structured logging, good performance even on high throughput and the added [Sentry](https://sentry.io) integration which will forward all errors logged to the supplied Sentry instance (see the `-sentryDsn` parameter).
+Additionally it would be no effort to use the built-in tracing library [Jaeger](github.com/uber/jaeger-lib), which has been spared for now, as it might have been out of scope.
+
 ## Test
 
 You are to write a new micro-service that will allow users to share feedback on their last game session and allow visibility to a live operations team.
