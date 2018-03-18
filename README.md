@@ -1,6 +1,7 @@
 # Ubisoft backend developer role test.
 [![Go Report Card](https://goreportcard.com/badge/github.com/kwiesmueller/ubisoft-backend-interview)](https://goreportcard.com/report/github.com/kwiesmueller/ubisoft-backend-interview)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/dd692d4293644b1ca429a1f69001c225)](https://www.codacy.com/app/kwiesmueller/ubisoft-backend-interview?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kwiesmueller/ubisoft-backend-interview&amp;utm_campaign=Badge_Grade)
+[![API Docs](https://img.shields.io/badge/API%20Docs-available-green.svg)](https://ubisoftbackendinterview.docs.apiary.io/#)
 [![Build Status](https://travis-ci.org/kwiesmueller/ubisoft-backend-interview.svg?branch=master)](https://travis-ci.org/kwiesmueller/ubisoft-backend-interview)
 [![Docker Repository on Quay](https://quay.io/repository/finch/ubisoft-backend-interview/status "Docker Repository on Quay")](https://quay.io/repository/finch/ubisoft-backend-interview)
 
@@ -30,6 +31,9 @@ I also thought about not doing any common database persistence as the required l
 Switching to a different persistence technology (like using batcher internally) or even existing NoSQL databases, is fairly easy. All that has to be done is implementing the [Repository Interface](pkg/feedback/repository.go). I might even supply another database option once I'm finished.
 
 The app itself is naturally packet into a docker image, but can also be built and deployed as single binary if necessary. Kubernetes manifests are supplied with the image as an example, too.
+
+API documentation is available on [Apiary](https://ubisoftbackendinterview.docs.apiary.io/#).
+The database design can be found in [db.sql](db.sql). 
 
 ## Dependencies
 
