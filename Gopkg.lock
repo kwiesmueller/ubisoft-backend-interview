@@ -85,7 +85,7 @@
   branch = "master"
   name = "github.com/playnet-public/libs"
   packages = ["log"]
-  revision = "e0dc02bbef63c7e7c1fa51a2531ae075c13c0586"
+  revision = "a85e661f7d1030fa57e8e74268b6069811fa038c"
 
 [[projects]]
   name = "github.com/uber/jaeger-client-go"
@@ -155,6 +155,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "82afd5594a509f06a07818fb30e8ff61273fd65793f274896fb35d427b23a8c6"
+  inputs-digest = "dfa3da5c85c623db6fe401f60314773e23dca6c9fadca0be9a6ccddda08120e8"
   solver-name = "gps-cdcl"
   solver-version = 1
