@@ -15,7 +15,7 @@ func TestNew(t *testing.T) {
 
 func TestAdd(t *testing.T) {
 	log := log.New("nop", "", true)
-	svc := New(log, &mockRepository{})
+	svc := New(log, newMockRepository(nil, nil))
 	if svc == nil {
 		t.Errorf("New() == nil")
 	}
@@ -39,7 +39,7 @@ func TestAdd(t *testing.T) {
 
 func TestLatest(t *testing.T) {
 	log := log.New("nop", "", true)
-	svc := New(log, &mockRepository{})
+	svc := New(log, newMockRepository(nil, nil))
 	if svc == nil {
 		t.Errorf("New() == nil")
 	}
