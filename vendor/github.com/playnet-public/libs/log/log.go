@@ -69,7 +69,6 @@ func New(name, dsn string, dbg bool) *Logger {
 	} else {
 		core = zapcore.NewTee(
 			zapcore.NewCore(consoleEncoder, consoleErrors, highPriority),
-			zapcore.NewCore(consoleEncoder, consoleDebugging, lowPriority),
 			zapcore.NewCore(sentryEncoder, consoleErrors, highPriority),
 		)
 	}

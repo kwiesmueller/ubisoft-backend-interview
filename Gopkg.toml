@@ -39,3 +39,7 @@
 [[constraint]]
   name = "gopkg.in/DATA-DOG/go-sqlmock.v1"
   version = "1.3.0"
+
+[[constraint]]
+  name = "github.com/bborbe/http"
+  source = "github.com/kwiesmueller/http"
