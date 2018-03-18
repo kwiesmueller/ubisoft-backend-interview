@@ -11,7 +11,7 @@ import (
 )
 
 func TestConnection_Open(t *testing.T) {
-	con := New(log.New("test", "", true))
+	con := New(log.NewNop())
 	err := con.Open("")
 	if err == nil {
 		t.Fatal("connection error mishandled")
@@ -25,7 +25,7 @@ func TestConnection_Add(t *testing.T) {
 	}
 	defer db.Close()
 
-	con := New(log.New("test", "", true))
+	con := New(log.NewNop())
 	con.DB = db
 
 	tests := []struct {
@@ -160,7 +160,7 @@ func TestConnection_GetLatest(t *testing.T) {
 			}
 			defer db.Close()
 
-			con := New(log.New("test", "", true))
+			con := New(log.NewNop())
 			con.DB = db
 
 			mock.MatchExpectationsInOrder(false)

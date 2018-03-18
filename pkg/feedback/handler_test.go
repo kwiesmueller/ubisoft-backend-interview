@@ -16,7 +16,7 @@ import (
 )
 
 func TestService_Handler(t *testing.T) {
-	svc := New(log.New("test", "", true), nil)
+	svc := New(log.NewNop(), nil)
 	h := svc.Handler()
 	if h == nil {
 		t.Error("Service.Handler() is nil")
@@ -24,7 +24,7 @@ func TestService_Handler(t *testing.T) {
 }
 
 func TestService_getEntries(t *testing.T) {
-	svc := New(log.New("test", "", true), nil)
+	svc := New(log.NewNop(), nil)
 
 	tests := []struct {
 		name        string
@@ -94,7 +94,7 @@ func TestService_getEntries(t *testing.T) {
 }
 
 func TestService_addEntry(t *testing.T) {
-	svc := New(log.New("test", "", true), nil)
+	svc := New(log.NewNop(), nil)
 
 	tests := []struct {
 		name    string
@@ -159,7 +159,6 @@ func TestService_addEntry(t *testing.T) {
 					"comment": ""
 				}`)).AddHeader("Ubi-UserId", "1"),
 			func(e Entry) error {
-				fmt.Print(e)
 				return errors.New("test error")
 			},
 			true,
@@ -186,7 +185,6 @@ func TestService_addEntry(t *testing.T) {
 			if err != nil {
 				t.Error("failed to decode response", err)
 			}
-			fmt.Println(tt.name, retErr, req)
 			if (retErr.Err == "") == tt.wantErr {
 				t.Error("Service.getEntries() wanted err", retErr)
 			}
