@@ -1,0 +1,114 @@
+FORMAT: 1A
+HOST: http://polls.apiblueprint.org/
+
+# ubisoft-backend-interview
+
+This is a simple feedback collection and retrival service built for the ubisoft-backend-interview test.
+
+## Feedback [/{sessionID}]
+
+### List the last 15 feedback entries [GET /]
+
++ Response 200 (application/json)
+
+        [
+            {
+                "id": "1",
+                "sessionID": "1",
+                "userID": "1",
+                "rating": 1,
+                "comment": "text"
+            }
+        ]
+
+### Add new entry [POST /{sessionID}]
+
+Entries can be supplied only per user/per session. The entry has to contain a rating of 1-5.
+The sessionID is supplied through the URL path.
+The userID is supplied as a Header called `Ubi-UserId`.
+A comment can be added, which is optional. 
+
++ Parameters
+    + sessionID (string, required) - Session which the user is rating
+
++ Attributes
+    + rating (number) - Value of 1-5
+    + comment (string, optional) - Optional comment
+
++ Request add new entry (application/json)
+
+    + Headers
+    
+            Ubi-UserId: {userID}
+    
+    + Body
+
+            {
+                "rating": 1,
+                "comment": ""
+            }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {}
+
++ Request add same entry (application/json)
+
+    + Headers
+
+            Ubi-UserId: {userID}
+
+    + Body
+
+            {
+                "rating": 1,
+                "comment": ""
+            }
+
++ Response 500
+
+    + Body
+
+            {
+                "error": "entries may only be sent once per user/session"
+            }
+
++ Request add invalid rating (application/json)
+
+    + Headers
+    
+            Ubi-UserId: {userID}
+    
+    + Body
+
+            {
+                "rating": -1,
+                "comment": ""
+            }
+
++ Response 500
+
+    + Body
+
+            {
+                "error": "rating invalid. has to be between 1-5"
+            }
+
++ Request with no userID (application/json)
+    
+    + Body
+
+            {
+                "rating": -1,
+                "comment": ""
+            }
+
++ Response 500
+
+    + Body
+
+            {
+                "error": "no userID provided"
+            }
