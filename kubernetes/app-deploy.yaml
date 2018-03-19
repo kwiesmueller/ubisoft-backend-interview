@@ -1,0 +1,58 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ubisoft-backend-interview
+  namespace: ubisoft-backend-interview
+  labels:
+    app: ubisoft-backend-interview
+    component: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ubisoft-backend-interview
+      component: app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: ubisoft-backend-interview
+        component: app
+    spec:
+      containers:
+      - name: app
+        image: quay.io/finch/ubisoft-backend-interview:latest
+        imagePullPolicy: Always
+        args:
+        - -dbHost=db
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 50m
+            memory: 50Mi
+          requests:
+            cpu: 50m
+            memory: 50Mi
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 8080
+          timeoutSeconds: 2
+        readinessProbe:
+          failureThreshold: 1
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 8080
+          timeoutSeconds: 2

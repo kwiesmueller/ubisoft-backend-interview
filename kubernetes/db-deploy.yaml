@@ -1,0 +1,81 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: db
+  namespace: ubisoft-backend-interview
+  labels:
+    app: ubisoft-backend-interview
+    component: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ubisoft-backend-interview
+      component: db
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: ubisoft-backend-interview
+        component: db
+    spec:
+      initContainers:
+      - name: pull-db-sql
+        image: busybox
+        command:
+        - wget
+        - "-O"
+        - "/work-dir/db.sql"
+        - 'https://raw.githubusercontent.com/kwiesmueller/ubisoft-backend-interview/master/db.sql'
+        volumeMounts:
+        - name: workdir
+          mountPath: "/work-dir"
+      containers:
+      - name: db
+        image: postgres:9.6-alpine
+        imagePullPolicy: Always
+        env:
+        - name: POSTGRES_PASSWORD
+          value: db
+        - name: POSTGRES_DB
+          value: db
+        - name: POSTGRES_USER
+          value: db
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        ports:
+        - name: db
+          containerPort: 5432
+        volumeMounts:
+        - name: workdir
+          mountPath: /docker-entrypoint-initdb.d
+        resources:
+          limits:
+            cpu: 200m
+            memory: 500Mi
+          requests:
+            cpu: 50m
+            memory: 25Mi
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 5432
+          timeoutSeconds: 2
+        readinessProbe:
+          failureThreshold: 1
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 5432
+          timeoutSeconds: 2
+      volumes:
+      - name: workdir
+        emptyDir: {}
