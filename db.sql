@@ -6,4 +6,4 @@ CREATE TABLE IF NOT EXISTS entries (
     comment       VARCHAR(50),
     PRIMARY key (session_id, user_id)
 );
-CREATE UNIQUE INDEX ON entries (id);
+CREATE INDEX IF NOT EXISTS entries_id ON entries (id);
