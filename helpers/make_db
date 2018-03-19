@@ -1,5 +1,5 @@
 DB_IMAGE=postgres
-DB_VERSION=9.6
+DB_VERSION=9.6-alpine
 DB_NAME=db
 
 start-db:
