@@ -27,6 +27,12 @@ var (
 	dbg         = flag.Bool("debug", false, "enable debug mode")
 	versionInfo = flag.Bool("version", true, "show version info")
 	sentryDsn   = flag.String("sentryDsn", "", "sentry dsn key")
+
+	dbHost     = flag.String("dbHost", "127.0.0.1", "database hostname")
+	dbPort     = flag.Int("dbPort", 5432, "database port")
+	dbUsername = flag.String("dbUsername", "db", "database username")
+	dbName     = flag.String("dbName", "db", "database name")
+	dbPassword = flag.String("dbPassword", "db", "database password")
 )
 
 func main() {
@@ -66,7 +72,14 @@ func main() {
 
 func do(log *log.Logger) error {
 	db := database.New(log)
-	err := db.Open(`host=localhost port=5432 user=db password=db dbname=db sslmode=disable`)
+	err := db.Open(fmt.Sprintf(
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		*dbHost,
+		*dbPort,
+		*dbUsername,
+		*dbPassword,
+		*dbName,
+	))
 	if err != nil {
 		return err
 	}
